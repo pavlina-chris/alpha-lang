@@ -1,0 +1,12 @@
+This directory contains auto-generated file templates. This is a custom part of
+the Alpha build system. When 'make' is run (specifically 'make autogen', but
+this is done automatically), the following will happen:
+
+    read key=value pairs from "autogen.conf"
+    for each file ending in ".auto" under autogen/
+        strip out first line - call this "path"
+        for each key in autogen.conf
+            replace all occurrences of %%key%% in file by value
+        save new file as "path" relative to source root
+
+These files will be cleaned up by 'make clean'

@@ -1,0 +1,50 @@
+./wscript
+
+APPNAME = '%%PKGNAME%%'
+VERSION = '%%VERSION%%'
+top = '.'
+out = 'build'
+
+import os
+
+def all_alco_c ():
+    sources = []
+    for root, dirs, files in os.walk ("src"):
+        for file in files:
+            if not file.endswith (".c"): continue
+            if root == "src" and file == "main.c": continue
+            sources.append (os.path.join (root, file))
+    return sources
+
+def options (opt):
+    opt.load ('compiler_c')
+
+def configure (conf):
+    conf.load ('compiler_c')
+
+    conf.check (header_name='unistd.h', features='c cprogram')
+    conf.check_cc (function_name='access', header_name='unistd.h',
+        mandatory=False, define_name="HAVE_ACCESS")
+    conf.check_cc (function_name='strlcpy', header_name='string.h',
+        mandatory=False, define_name="HAVE_STRLCPY")
+
+    conf.write_config_header ('config.h')
+
+def build (bld):
+    debug_cflags = ' -O2'
+    debug_defines = ['NDEBUG']
+    if "DEBUG" in os.environ:
+        debug_cflags = ' -ggdb -O0'
+        debug_defines = ['DEBUG']
+
+    bld.objects (source = all_alco_c (),
+                 cflags = '-Wall -Wextra' + debug_cflags,
+                 defines = debug_defines,
+                 target = 'alco_obj',
+                 includes = '.')
+    bld.program (source = 'src/main.c',
+                 cflags = '-Wall -Wextra' + debug_cflags,
+                 defines = debug_defines,
+                 target = 'alco',
+                 use = 'alco_obj',
+                 includes = '.')

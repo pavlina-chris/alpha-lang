@@ -1,0 +1,15 @@
+./src/info.h
+
+/* WARNING: THIS FILE IS AUTO-GENERATED. If you edit it, you will lose all
+ * changes very quickly. Edit the source in autogen/info.auto, then re-run
+ * Make. */
+
+#ifndef _INFO_H
+#define _INFO_H 1
+
+#define APPNAME "%%APPNAME%%"
+#define VERSION "%%VERSION%%"
+#define COPR_BY "%%COPR_BY%%"
+#define COPR_YEAR %%COPR_YEAR%%
+
+#endif /* _INFO_H */
