@@ -16,15 +16,19 @@ struct free_list {
 
 static struct free_list *list = NULL;
 
-void free_on_exit (void *mem) {
-    struct free_list *item = malloc (sizeof (*item));
+void
+free_on_exit (void *mem) {
+    struct free_list *item;
+
+    item = malloc (sizeof (*item));
     if (!item) error_errno ();
     item->mem = mem;
     item->next = list;
     list = item;
 }
 
-void do_free_on_exit (void) {
+void
+do_free_on_exit (void) {
     struct free_list *hold;
 
     while (list) {

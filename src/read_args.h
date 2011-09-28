@@ -14,7 +14,8 @@ struct args;
  * argv: argv form main()
  * return: nonzero if main() should return args->exit_code
  */
-int read_args (struct args *args, int argc, char **argv);
+int
+read_args (struct args *args, int argc, char **argv);
 
 /* This structure holds command line argument information after parsing.
  * Note: Remember that since only one of these will ever be used in the entire
@@ -107,6 +108,9 @@ struct args {
 
     /* Systems mode? */
     int sm;
+
+    /* Various warning flags */
+    int w_octalish;
 
     /* Function to use for malloc() */
     char const *malloc;

@@ -12,6 +12,7 @@ const char **TYPES;
 /* Check whether a words is a keyword.
  * include_types: Whether to include special type names as "keywords"
  */
-int is_keyword (const char *word, int include_types);
+int
+is_keyword (const char *word, int include_types);
 
 #endif /* _KEYWORDS_H */

@@ -14,7 +14,8 @@
 #include "parse/parse.h"
 #include "free_on_exit.h"
 
-static void construct_env (struct args *args, struct env *env)
+static void
+construct_env (struct args *args, struct env *env)
 {
     assert (args && env);
 
@@ -25,25 +26,33 @@ static void construct_env (struct args *args, struct env *env)
     if (args->nogc) {
         env->malloc = "malloc";
         env->free = "free";
-    } else {
+    }
+    else {
         env->malloc = "GC_malloc";
         env->free = "GC_free";
     }
+
     if (args->sm) {
         env->malloc = "malloc";
         env->free = "free";
         env->boundck = 0;
         env->nulloom = 1;
     }
-    env->boundck = !args->noboundck;
+
     if (args->malloc && *args->malloc)
         env->malloc = args->malloc;
+
     if (args->free && *args->free)
         env->free = args->free;
+
+    env->boundck = !args->noboundck;
     env->debug = args->debug;
+
+    env->w_octalish = args->w_octalish;
 }
 
-static void set_paths (struct args *args, struct env *env)
+static void
+set_paths(struct args *args, struct env *env)
 {
     struct config_file cfg;
 
@@ -79,7 +88,7 @@ static void set_paths (struct args *args, struct env *env)
     env->llvm_as = cfg.llvm_as ? cfg.llvm_as : env->llvm_as;
     env->as = cfg.as ? cfg.as : env->as;
     env->ld = cfg.ld ? cfg.ld : env->ld;
-
+        
     /* Load from arguments */
     env->crt1_32 = args->crt1_32 ? args->crt1_32 : env->crt1_32;
     env->crti_32 = args->crti_32 ? args->crti_32 : env->crti_32;
@@ -112,42 +121,38 @@ static void set_paths (struct args *args, struct env *env)
     }
 }
 
-static void check_paths (struct args *args, struct env *env)
+static void
+check_paths(struct args *args, struct env *env)
 {
-    if (f_access (env->llc, X_OK))
-        error_message ("missing path or no permission: %s", env->llc);
-    if (f_access (env->llvm_as, X_OK))
-        error_message ("missing path or no permission: %s", env->llvm_as);
-    if (f_access (env->as, X_OK))
-        error_message ("missing path or no permission: %s", env->as);
-    if (f_access (env->ld, X_OK))
-        error_message ("missing path or no permission: %s", env->ld);
 
-    if (args->emit_llvm || args->assembly || args->objfile) return;
+#define TRY(a, fn) if (f_access (fn, a)) error_message ("cannot access %s", fn)
 
-    if (f_access (env->crt1, R_OK))
-        error_message ("missing path or no permission: %s", env->crt1);
-    if (f_access (env->crti, R_OK))
-        error_message ("missing path or no permission: %s", env->crti);
-    if (f_access (env->crtn, R_OK))
-        error_message ("missing path or no permission: %s", env->crtn);
-    if (f_access (env->ldso, R_OK && X_OK))
-        error_message ("missing path or no permission: %s", env->ldso);
-    if (f_access (env->runtime, R_OK))
-        error_message ("missing path: %s", env->runtime);
+    TRY(X_OK, env->llc);
+    TRY(X_OK, env->llvm_as);
+    TRY(X_OK, env->as);
+    TRY(X_OK, env->ld);
+
+    if (args->emit_llvm || args->assembly || args->objfile)
+        return;
+
+    TRY(R_OK, env->crt1);
+    TRY(R_OK, env->crti);
+    TRY(R_OK, env->crtn);
+    TRY(R_OK | X_OK, env->ldso);
+    TRY(R_OK, env->runtime);
+#undef TRY
 }
 
 /* Output one line of the path dump */
-static inline void dump_path (const char *name, const char *path)
+static inline void
+dump_path(const char *name, const char *path)
 {
-    if (!f_access (path, F_OK)) {
-        printf ("%-10s (PRESENT): %s\n", name, path);
-    } else {
-        printf ("%-10s (MISSING): %s\n", name, path);
-    }
+    printf ("%-10s (%s): %s\n", name,
+           f_access (path, F_OK) ? "PRESENT" : "MISSING", path);
 }
 
-static void dump_paths (struct env *env)
+static void
+dump_paths(struct env *env)
 {
     dump_path ("crt1-32", env->crt1_32);
     dump_path ("crti-32", env->crti_32);
@@ -165,17 +170,13 @@ static void dump_paths (struct env *env)
     dump_path ("ld", env->ld);
 }
 
-int main (int argc, char **argv)
+int main
+(int argc, char **argv)
 {
-
     struct args args;
     struct env env;
     size_t i;
-    /* We check each file to determine if it's a .al or .o file. We need this
-     * information more than once, and it's a somewhat expensive check, so
-     * store the information. These are flags indicating whether a given file
-     * (as listed in args.sources) is a .al file.
-     */
+    /* List of booleans corresponding to sources: is this a .al file? */
     char al_files[LIST_ARG_MAX] = {0};
 
     /* Error handling code needs to know my name */
@@ -192,16 +193,19 @@ int main (int argc, char **argv)
         dump_paths (&env);
         return 0;
     }
+
     if (!args.sources[0]) {
         error_message ("no sources to compile");
     }
+
     /* Check if the string ends with '.al' or '.o' */
     for (i = 0; i < LIST_ARG_MAX; ++i) {
         if (!args.sources[i]) break;
-        size_t len = strlen (args.sources[i]);
+        size_t len = strlen(args.sources[i]);
         if (len < 3) {
-            /* 3 is the minimum length for a file name ending in .al or .o */
-            error_message ("unknown source type: %s", args.sources[i]);
+            /* strlen(".al") == 3 */
+            error_message("unknown source type: %s",
+                          args.sources[i]);
         }
         if (args.sources[i][len - 1] == 'l' &&
             args.sources[i][len - 2] == 'a' &&
@@ -213,35 +217,42 @@ int main (int argc, char **argv)
                    args.sources[i][len - 2] == '.') {
             /* .o file - this is OK */
         } else {
-            error_message ("unknown source type: %s", args.sources[i]);
+            error_message("unknown source type: %s",
+                          args.sources[i]);
         }
     }
-    check_paths (&args, &env);
+        
+    check_paths(&args, &env);
 
     /* Compile */
     /* Run lex and parse on each file. */
     for (i = 0; i < LIST_ARG_MAX; ++i) {
         struct lex lex;
         if (!al_files[i]) continue;
-        lexer_init (args.sources[i], &env, &lex);
-        lexer_lex (&lex);
+        lexer_init(args.sources[i], &env, &lex);
+        lexer_lex(&lex);
+
         if (args.tokens_only) {
+            /* Option -tokens: dump tokens */
             size_t i;
-            for (i = 0; i < lex.n_tokens; ++i) {
-                print_token (stdout, &lex.tokens[i]);
-            }
-        } else {
-          struct ast *ast = parse_file (&lex, &env);
-          if (args.pre_ast_only) {
-            print_ast (ast, stdout);
-          }
-          free_ast (ast);
+            for (i = 0; i < lex.n_tokens; ++i)
+                print_token(stdout, &lex.tokens[i]);
+            lexer_free (&lex);
+            do_free_on_exit ();
+            return 0;
         }
+
+        struct ast *ast = parse_file (&lex, &env);
+        if (args.pre_ast_only) {
+            print_ast (ast, stdout);
+            free_ast (ast);
+            lexer_free (&lex);
+            do_free_on_exit ();
+            return 0;
+        }
+
+        free_ast (ast);
         lexer_free (&lex);
-    }
-    if (args.tokens_only || args.pre_ast_only) {
-        do_free_on_exit ();
-        return 0;
     }
 
     do_free_on_exit ();

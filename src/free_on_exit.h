@@ -14,11 +14,18 @@
  * for real leaks. */
 
 #ifdef DEBUG
-void free_on_exit (void *mem);
-void do_free_on_exit (void);
+
+void
+free_on_exit (void *mem);
+
+void
+do_free_on_exit (void);
+
 #else
+
 #define free_on_exit(m) ((void) 0)
 #define do_free_on_exit() ((void) 0)
+
 #endif /* DEBUG */
 
 #endif /* _FREE_ON_EXIT_H */

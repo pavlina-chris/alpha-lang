@@ -14,6 +14,7 @@ struct config_file {
  * are malloc()ed, since they'll be held for the program's entire existence,
  * there's no reason to bother free()ing. If the file doesn't mention a certain
  * path, the path in the struct will be NULL. */
-void load_config (struct config_file *cfg);
+void
+load_config (struct config_file *cfg);
 
 #endif /* _CONFIG_FILE_H */

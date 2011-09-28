@@ -26,8 +26,12 @@
 #include <stdio.h>
 
 #define f_access access
-size_t size_of (const char *path);
-size_t size_of_f (FILE *f);
+
+size_t
+size_of (const char *path);
+
+size_t
+size_of_f (FILE *f);
 
 #else
 #error "Bad platform - don't know how to define filesystem functions"

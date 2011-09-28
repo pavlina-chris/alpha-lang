@@ -3,9 +3,6 @@
 #ifndef _DEFAULT_PATHS_H
 #define _DEFAULT_PATHS_H 1
 
-/* TASK Add architecture
- * Add defaults here */
-
 #define DEFAULT_CRT1_32 "/usr/lib/crt1.o"
 #define DEFAULT_CRTI_32 "/usr/lib/crti.o"
 #define DEFAULT_CRTN_32 "/usr/lib/crtn.o"

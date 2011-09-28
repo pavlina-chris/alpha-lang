@@ -25,6 +25,9 @@ struct env {
     /* free() function */
     char const *free;
 
+    /* Various warnings */
+    int w_octalish;
+
     /* Paths */
     char const *crt1_32, *crti_32, *crtn_32, *ldso_32, *runtime_32,
          *crt1_64, *crti_64, *crtn_64, *ldso_64, *runtime_64,

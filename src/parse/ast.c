@@ -22,7 +22,8 @@ static const size_t DEFAULT_CHILDREN_MEM[] = {
     /* expr */        2,
     /* scope */      16 };
 
-struct ast *new_ast (enum ast_tag type)
+struct ast *
+new_ast (enum ast_tag type)
 {
   struct ast *s;
 
@@ -43,7 +44,8 @@ struct ast *new_ast (enum ast_tag type)
   return s;
 }
 
-void ast_add (struct ast *parent, struct ast *child)
+void
+ast_add (struct ast *parent, struct ast *child)
 {
   if (parent->n_children + 1 > parent->children_mem) {
     struct ast **new_children;
@@ -58,7 +60,8 @@ void ast_add (struct ast *parent, struct ast *child)
   child->parent = parent;
 }
 
-void free_ast (struct ast *ast)
+void
+free_ast (struct ast *ast)
 {
   void (*free_fns[]) (struct ast *) =
     { free_file, NULL, NULL, NULL, NULL,
@@ -73,13 +76,15 @@ void free_ast (struct ast *ast)
   free (ast);
 }
 
-void print_ast (struct ast *ast, FILE *dest)
+void
+print_ast (struct ast *ast, FILE *dest)
 {
   _print_ast (ast, dest, 0);
   fputc ('\n', dest);
 }
 
-void _print_ast (struct ast *ast, FILE *dest, int indent)
+void
+_print_ast (struct ast *ast, FILE *dest, int indent)
 {
   void (*print_fns[]) (struct ast *, FILE *, int) =
     { print_file, NULL, NULL, NULL, NULL,

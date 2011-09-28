@@ -9,21 +9,27 @@
 #include <unistd.h>
 #include <stdio.h>
 
-size_t size_of (const char *path)
+size_t
+size_of (const char *path)
 {
-  struct stat sbuf;
-  if (stat (path, &sbuf)) return 0;
-  return sbuf.st_size;
+    struct stat sbuf;
+    if (stat (path, &sbuf)) {
+        return 0;
+    }
+    return sbuf.st_size;
 }
 
-size_t size_of_f (FILE *f)
+size_t
+size_of_f (FILE *f)
 {
-  int fd;
-  struct stat sbuf;
+    int fd;
+    struct stat sbuf;
 
-  fd = fileno (f);
-  if (fstat (fd, &sbuf)) return 0;
-  return sbuf.st_size;
+    fd = fileno (f);
+    if (fstat (fd, &sbuf)) {
+        return 0;
+    }
+    return sbuf.st_size;
 }
 
 #else

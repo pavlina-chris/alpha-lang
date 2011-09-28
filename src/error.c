@@ -13,16 +13,19 @@
 /* Name of the running program (argv[0]) */
 static char const *name;
 
-void error_set_name (char const *n) {
+void
+error_set_name (char const *n) {
     name = n;
 }
 
-void error_errno () {
+void
+error_errno () {
     perror (name);
     exit (1);
 }
 
-void error_message (const char *fmt, ...)
+void
+error_message (const char *fmt, ...)
 {
     fputs (name, stderr);
     fputs (": error: ", stderr);
@@ -35,7 +38,8 @@ void error_message (const char *fmt, ...)
 }
 
 
-void warning_message (const char *fmt, ...) {
+void
+warning_message (const char *fmt, ...) {
     fputs (name, stderr);
     fputs (": warning: ", stderr);
     va_list ap;
@@ -47,32 +51,34 @@ void warning_message (const char *fmt, ...) {
 
 /* Print out line number 'line' from the lexer (zero-based), with a caret at
  * 'col' and an underline running from 'start' to just before 'stop'. */
-static void annotate_line (struct lex *lex, size_t line, size_t col,
-                           size_t start, size_t stop)
+static void
+annotate_line (struct lex *lex, size_t line, size_t col, size_t start,
+               size_t stop)
 {
-  char *L = lex->lines[line];
-  size_t i;
+    char *L = lex->lines[line];
+    size_t i;
 
-  /* Print line */
-  for (i = 0; L[i] && L[i] != '\n'; ++i)
-    fputc (L[i], stderr);
-  fputc ('\n', stderr);
+    /* Print line */
+    for (i = 0; L[i] && L[i] != '\n'; ++i)
+        fputc (L[i], stderr);
+    fputc ('\n', stderr);
 
-  /* Annotate */
-  for (i = 0; L[i] && L[i] != '\n'; ++i) {
-    if (i == col)
-      fputc ('^', stderr);
-    else if (i >= start && i < stop && L[i] != '\t')
-      fputc ('~', stderr);
-    else if (L[i] == '\t')
-      fputc ('\t', stderr);
-    else
-      fputc (' ', stderr);
-  }
-  fputc ('\n', stderr);
+    /* Annotate */
+    for (i = 0; L[i] && L[i] != '\n'; ++i) {
+        if (i == col)
+            fputc ('^', stderr);
+        else if (i >= start && i < stop && L[i] != '\t')
+            fputc ('~', stderr);
+        else if (L[i] == '\t')
+            fputc ('\t', stderr);
+        else
+            fputc (' ', stderr);
+    }
+    fputc ('\n', stderr);
 }
 
-void cerror_at (struct lex *lex, struct token *tok, const char *fmt, ...)
+void
+cerror_at (struct lex *lex, struct token *tok, const char *fmt, ...)
 {
     // Basic prefix: file:line:col: error:
     fprintf (stderr, "%s:%zu:%zu: error: ", lex->file,
@@ -91,7 +97,8 @@ void cerror_at (struct lex *lex, struct token *tok, const char *fmt, ...)
     exit (1);
 }
 
-void cerror_after (struct lex *lex, struct token *tok, const char *fmt, ...)
+void
+cerror_after (struct lex *lex, struct token *tok, const char *fmt, ...)
 {
     // Basic prefix: file:line:col: error:
     fprintf (stderr, "%s:%zu:%zu: error: ", lex->file,
@@ -109,7 +116,8 @@ void cerror_after (struct lex *lex, struct token *tok, const char *fmt, ...)
     exit (1);
 }
 
-void cwarning_at (struct lex *lex, struct token *tok, const char *fmt, ...)
+void
+cwarning_at (struct lex *lex, struct token *tok, const char *fmt, ...)
 {
     // Basic prefix: file:line:col: warning:
     fprintf (stderr, "%s:%zu:%zu: warning: ", lex->file,
@@ -126,7 +134,8 @@ void cwarning_at (struct lex *lex, struct token *tok, const char *fmt, ...)
                    tok->col + strlen (tok->value));
 }
 
-void cwarning_after (struct lex *lex, struct token *tok, const char *fmt, ...)
+void
+cwarning_after (struct lex *lex, struct token *tok, const char *fmt, ...)
 {
     // Basic prefix: file:line:col: error:
     fprintf (stderr, "%s:%zu:%zu: warning: ", lex->file,
@@ -142,7 +151,8 @@ void cwarning_after (struct lex *lex, struct token *tok, const char *fmt, ...)
     annotate_line (lex, tok->line, tok->col, 0, 0);
 }
 
-void cerror_eof (struct lex *lex, const char *fmt, ...)
+void
+cerror_eof (struct lex *lex, const char *fmt, ...)
 {
     fprintf (stderr, "%s: unexpected end of file: ", lex->file);
 

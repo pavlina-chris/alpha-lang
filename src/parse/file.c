@@ -5,7 +5,8 @@
 #include "../keywords.h"
 
 /* Read the "executable" or "package" declaration. */
-static int read_exec_package (struct lex *lex)
+static int
+read_exec_package (struct lex *lex)
 {
   struct token *token = lexer_next (lex);
   if (!token) {
@@ -21,7 +22,8 @@ static int read_exec_package (struct lex *lex)
 }
 
 /* Read the package name and semicolon */
-static char *read_name (struct lex *lex)
+static char *
+read_name (struct lex *lex)
 {
   char *name;
   struct token *token = lexer_next (lex);
@@ -43,7 +45,10 @@ static char *read_name (struct lex *lex)
   return name;
 }
 
-static struct ast *read_child (struct lex *lex, struct env *env)
+static struct ast *parse_function (void *a, void *b) { return NULL; }
+
+static struct ast *
+read_child (struct lex *lex, struct env *env)
 {
   struct token *token = lexer_peek (lex);
 
@@ -55,7 +60,8 @@ static struct ast *read_child (struct lex *lex, struct env *env)
     return parse_function (lex, env);
 }
 
-struct ast *parse_file (struct lex *lex, struct env *env)
+struct ast *
+parse_file (struct lex *lex, struct env *env)
 {
   struct ast *ast = new_ast (AST_FILE);
   
@@ -77,9 +83,11 @@ struct ast *parse_file (struct lex *lex, struct env *env)
 }
 
 /* Nothing to do */
-void free_file (struct ast *ast) { (void) ast; }
+void
+free_file (struct ast *ast) { (void) ast; }
 
-void print_file (struct ast *ast, FILE *dest, int indent)
+void
+print_file (struct ast *ast, FILE *dest, int indent)
 {
   /* (executable "name"
    *   (child...)

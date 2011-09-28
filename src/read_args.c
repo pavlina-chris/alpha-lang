@@ -42,21 +42,21 @@ static void version (void);
 static const char *get_machine (void);
 static char *consume (int argc, char **argv, int *i, int len, int meta);
 
-int read_args (struct args *args, int argc, char **argv)
+int
+read_args(struct args *args, int argc, char **argv)
 {
     int i;
-
-    // Count positions in collection arrays
+    /* Count positions in collection arrays */
     int libs_count = 0, lib_dirs_count = 0, pkg_dirs_count = 0,
         llc_opts_count = 0, as_opts_count = 0, ld_opts_count = 0,
         sources_count = 0;
 
-    init_args (args);
+    init_args(args);
 
     for (i = 1; i < argc; ++i) {
         if (!strcmp (argv[i], "-h") ||
-                !strcmp (argv[i], "-help") ||
-                !strcmp (argv[i], "--help")) {
+            !strcmp (argv[i], "-help") ||
+            !strcmp (argv[i], "--help")) {
             usage (*argv);
             args->exit_code = 0;
             return 1;
@@ -77,25 +77,26 @@ int read_args (struct args *args, int argc, char **argv)
         }
 
         else if (!strncmp (argv[i], "-path=", 6)) {
-            // Acceptable syntax:
-            //  -path=help
-            //  -path=key:value
+            /* Acceptable syntax:
+             *  -path=help
+             *  -path=key:value
+             */
+            /* Message is down here to fit it in... */
+#define MSG "The -path argument can be used to give paths to files at compile" \
+                " time.\nThe format is \"-path=key:value\", where the valid " \
+                "keys are:\n  llc, llvm-as, as, ld, crt1-64, crti-64, " \
+                "crtn-64, ldso-64,\n  crt1-32, crti-32, crtn-32, ldso-32, " \
+                "runtime-64, runtime-32\n"
             if (!strcmp (argv[i], "-path=help")) {
-                printf ("The -path argument can be used to give paths to "
-                        "files at compile time.\n"
-                        "The format is \"-path=key:value\", where the valid "
-                        "keys are:\n"
-                        "  llc, llvm-as, as, ld, crt1-64, crti-64, crtn-64, "
-                        "ldso-64,\n"
-                        "  crt1-32, crti-32, crtn-32, ldso-32, runtime-64, "
-                        "runtime-32\n");
+                printf (MSG);
                 args->exit_code = 0;
                 return 1;
             }
+#undef MSG
 
             // Separate key and value
             if (argv[i][6] == 0)
-                error_message ("-path option expects argument");
+                error_message("-path option expects argument");
             char *key = argv[i] + 6;
             char *value = strchr (key, ':');
             if (key == value || !value) {
@@ -294,6 +295,13 @@ int read_args (struct args *args, int argc, char **argv)
             args->force_platform = 1;
         }
 
+        else if (!strcmp (argv[i], "-Wno-octalish")) {
+            args->w_octalish = 0;
+        }
+        else if (!strcmp (argv[i], "-Woctalish")) {
+            args->w_octalish = 1;
+        }
+
         else if (*argv[i] != '-') {
             if (sources_count >= (LIST_ARG_MAX - 1)) {
                 error_message ("too many source files");
@@ -346,9 +354,14 @@ static void usage (char const *argv0)
         "    -malloc <func>    use <func> as the allocator\n"
         "    -free <func>      use <func> as the deallocator\n"
         "------------------------------------------------------------------\n"
+        "    -W(no-)octalish   (do not) warn about the use of numbers like\n"
+        "                      0755 (which is decimal 755 in Alpha).\n"
+        "                      Default: do warn.\n"
+        "------------------------------------------------------------------\n"
         "    -debug-mode       run in debug mode\n"
         "    -error-trace      print a stack trace for compiler errors\n"
-        "    -tokens           dump the token list after lexing, and quit\n"
+        "    -tokens           dump the token list after lexing the first"
+        "                      input, then quit\n"
         "    -ast              dump the AST after parsing, and quit\n"
         "    -pre-ast          dump the AST before type checking, and quit\n"
         "    -force-platform   force compiling on an unsupported platform\n",
@@ -366,6 +379,9 @@ static void init_args (struct args *args)
 {
     /* Most of the fields initialise to 0 */
     memset (args, 0, sizeof (*args));
+
+    /* Some do not */
+    args->w_octalish = 1;
 
     args->sources = malloc (LIST_ARG_MAX * sizeof (*args->sources));
     if (args->sources == NULL) error_errno ();
@@ -408,8 +424,6 @@ static void init_args (struct args *args)
 /* Get the default machine type (32 or 64) */
 static const char *get_machine (void)
 {
-    /* TASK Add architecture
-     * Add tests for different architectures below, if necessary. */
     if (sizeof (void*) == 4)
         return "32";
     else if (sizeof (void*) == 8)

@@ -12,7 +12,8 @@
 #define LINE_LENGTH 512
 
 /* Try strdup() and fail on OOM */
-static char *xstrdup (const char *s)
+static inline char *
+xstrdup (const char *s)
 {
     char *dup = strdup (s);
     if (!dup) error_errno ();
@@ -26,21 +27,26 @@ static char *xstrdup (const char *s)
  * f: file to read from
  * lineno: which line we are on (for error messsages - 1-based)
  * return: feof? */
-static int get_line (char *buf, size_t sz, FILE *f, size_t lineno)
+static int
+get_line (char *buf, size_t sz, FILE *f, size_t lineno)
 {
     size_t i;
-    int found_eol = 0;
+    int c, found_eol = 0;
+
     for (i = 0; i < (sz - 1); ++i) {
-        int c = fgetc (f);
+        c = fgetc (f);
         if (c == EOF && feof (f)) {
             found_eol = 1;
             break;
-        } else if (c == EOF) {
+        }
+        else if (c == EOF) {
             error_errno ();
-        } else if (c == '\n') {
+        }
+        else if (c == '\n') {
             found_eol = 1;
             break;
-        } else
+        }
+        else
             buf[i] = (char) c;
     }
     if (!found_eol) {
@@ -50,12 +56,14 @@ static int get_line (char *buf, size_t sz, FILE *f, size_t lineno)
     return feof (f);
 }
 
-void load_config (struct config_file *cfg)
+void
+load_config (struct config_file *cfg)
 {
     FILE *f;
     char const *path;
-    size_t lineno;
+    char *key, *value, *temp, *copy;
     char line[LINE_LENGTH];
+    size_t lineno;
 
     memset (cfg, 0, sizeof (*cfg));
 
@@ -71,19 +79,22 @@ void load_config (struct config_file *cfg)
     }
 
     for (lineno = 1; !get_line (line, LINE_LENGTH, f, lineno); ++lineno) {
-        /* Decomment */
-        char *comm = strchr (line, '#');
-        if (comm) *comm = 0;
 
-        char *key, *value, *temp;
+        /* Decomment */
+        temp = strchr (line, '#');
+        if (temp) {
+            *temp = 0;
+        }
 
         /* Find the start of the key */
         for (key = line; *key; ++key) {
             if (*key != ' ' && *key != '\t') break;
         }
-        if (!*key)
+
+        if (!*key) {
             /* No key found */
             continue;
+        }
 
         /* Find the end of the key */
         for (temp = key + 1; *temp; ++temp) {
@@ -95,8 +106,11 @@ void load_config (struct config_file *cfg)
 
         /* Find the start of the value */
         for (value = temp + 1; *value; ++value) {
-            if (*value != ' ' && *value != '\t') break;
+            if (*value != ' ' && *value != '\t') {
+                break;
+            }
         }
+
         if (!*value) {
             /* No value found */
             error_message ("line %d in configuration file %s invalid",
@@ -112,7 +126,7 @@ void load_config (struct config_file *cfg)
         }
 
         /* Store the value */
-        char *copy = xstrdup (value);
+        copy = xstrdup (value);
         free_on_exit (copy);
         if (!strcmp (key, "crt1-32")) {
             cfg->crt1_32 = copy;

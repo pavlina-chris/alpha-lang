@@ -7,7 +7,8 @@
 #define DEFAULT_SIZE 16
 
 /* Make room for another entry in a stringlist. */
-static int make_room (struct stringlist *sl)
+static int
+make_room (struct stringlist *sl)
 {
     if (sl->n_in_list >= (sl->buf_size - 1)) {
         char **new_list = realloc (sl->list,
@@ -20,7 +21,8 @@ static int make_room (struct stringlist *sl)
     return 0;
 }
 
-int stringlist_init (struct stringlist *sl)
+int
+stringlist_init (struct stringlist *sl)
 {
     sl->list = malloc (DEFAULT_SIZE * sizeof (*sl->list));
     if (!sl->list) return 1;
@@ -30,7 +32,8 @@ int stringlist_init (struct stringlist *sl)
     return 0;
 }
 
-int stringlist_append (struct stringlist *sl, const char *s)
+int
+stringlist_append (struct stringlist *sl, const char *s)
 {
     char *copy = strdup (s);
     if (!copy) return 1;
@@ -42,12 +45,14 @@ int stringlist_append (struct stringlist *sl, const char *s)
     return 0;
 }
 
-char *stringlist_get (struct stringlist *sl, size_t i)
+char *
+stringlist_get (struct stringlist *sl, size_t i)
 {
     return sl->list[i];
 }
 
-int stringlist_set (struct stringlist *sl, size_t i, const char *s)
+int
+stringlist_set (struct stringlist *sl, size_t i, const char *s)
 {
     char *copy = strdup (s);
     if (!copy) return 1;
@@ -58,17 +63,20 @@ int stringlist_set (struct stringlist *sl, size_t i, const char *s)
     return 0;
 }
 
-size_t stringlist_len (struct stringlist *sl)
+size_t
+stringlist_len (struct stringlist *sl)
 {
     return sl->n_in_list;
 }
 
-char **stringlist_array (struct stringlist *sl)
+char **
+stringlist_array (struct stringlist *sl)
 {
     return sl->list;
 }
 
-void stringlist_free (struct stringlist *sl)
+void
+stringlist_free (struct stringlist *sl)
 {
     size_t i;
     for (i = 0; i < sl->n_in_list; ++i) {
